@@ -1,0 +1,7 @@
+body {
+  margin: 0;
+  /* Font family is managed by Material UI ThemeProvider */
+  background-color: #f0f2f5; /* Fallback background */
+}
+
+/* Other global styles can go here */
