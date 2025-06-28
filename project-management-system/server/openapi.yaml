@@ -1,0 +1,248 @@
+openapi: 3.0.0
+info:
+  title: Project Management System API
+  version: v1.0.0
+  description: API for managing projects in the Khelo Tech Unified Sports Portal.
+  contact:
+    name: Khelo Tech Support
+    email: support@khelotech.com
+
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+
+components:
+  schemas:
+    Project:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid # Or string if using timestamp-based
+          description: Unique identifier for the project.
+          readOnly: true
+        name:
+          type: string
+          description: Name of the project.
+          example: "New Stadium Lighting"
+        description:
+          type: string
+          description: Detailed description of the project.
+          example: "Upgrade current stadium lighting to LED."
+        startDate:
+          type: string
+          format: date
+          description: Estimated start date of the project.
+          example: "2024-08-01"
+        endDate:
+          type: string
+          format: date
+          description: Estimated end date of the project.
+          example: "2024-12-31"
+        scope:
+          type: string
+          description: Detailed scope of the project.
+          example: "Includes purchase and installation of LED lights, excluding electrical system upgrades."
+        objectives:
+          type: array
+          items:
+            type: string
+          description: List of specific project objectives.
+          example: ["Reduce energy consumption by 30%", "Improve lighting quality for night games"]
+        deliverables:
+          type: array
+          items:
+            type: string
+          description: List of tangible project deliverables.
+          example: ["Installed LED lighting system", "Final lighting audit report"]
+        # status:  # To be added later
+        #   type: string
+        #   enum: [Planning, Active, OnHold, Completed, Cancelled]
+        #   description: Current status of the project.
+        # created_at:
+        #   type: string
+        #   format: date-time
+        #   description: Timestamp of when the project was created.
+        #   readOnly: true
+        # updated_at:
+        #   type: string
+        #   format: date-time
+        #   description: Timestamp of when the project was last updated.
+        #   readOnly: true
+
+    ProjectInput: # Schema for creating/updating projects, omitting readOnly fields like id
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "New Stadium Lighting"
+        description:
+          type: string
+          example: "Upgrade current stadium lighting to LED."
+        startDate:
+          type: string
+          format: date
+          example: "2024-08-01"
+        endDate:
+          type: string
+          format: date
+          example: "2024-12-31"
+        scope:
+          type: string
+          example: "Includes purchase and installation of LED lights, excluding electrical system upgrades."
+        objectives:
+          type: array
+          items:
+            type: string
+          example: ["Reduce energy consumption by 30%", "Improve lighting quality for night games"]
+        deliverables:
+          type: array
+          items:
+            type: string
+          example: ["Installed LED lighting system", "Final lighting audit report"]
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: A human-readable error message.
+        code:
+          type: integer
+          format: int32
+          description: An optional internal error code.
+
+  responses:
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Invalid request payload or parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnauthorizedError:
+      description: Authentication information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error' # Example, might need specific schema
+    InternalServerError:
+      description: An unexpected error occurred on the server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+paths:
+  /projects:
+    get:
+      summary: List all projects
+      tags:
+        - Projects
+      operationId: listProjects
+      responses:
+        '200':
+          description: A list of projects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new project
+      tags:
+        - Projects
+      operationId: createProject
+      requestBody:
+        description: Project object to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '201':
+          description: Project created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /projects/{projectId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: ID of the project to operate on.
+        schema:
+          type: string
+          # format: uuid # if using UUIDs
+    get:
+      summary: Get a project by ID
+      tags:
+        - Projects
+      operationId: getProjectById
+      responses:
+        '200':
+          description: Successfully retrieved project details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update an existing project
+      tags:
+        - Projects
+      operationId: updateProject
+      requestBody:
+        description: Project object with updated fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '200':
+          description: Project updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete a project by ID
+      tags:
+        - Projects
+      operationId: deleteProject
+      responses:
+        '204':
+          description: Project deleted successfully. No content.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
