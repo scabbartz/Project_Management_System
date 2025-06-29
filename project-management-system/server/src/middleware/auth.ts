@@ -20,15 +20,26 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 
 // Middleware to verify JWT token
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+  console.log('=== AUTHENTICATION DEBUG ===');
+  console.log('Request URL:', req.url);
+  console.log('Request method:', req.method);
+  console.log('All headers:', req.headers);
+  
   const authHeader = req.headers['authorization'];
+  console.log('Authorization header:', authHeader);
+  
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  console.log('Extracted token:', token ? 'present' : 'missing');
 
   if (!token) {
+    console.log('No token found, returning 401');
     return res.status(401).json({ message: 'Access token required' });
   }
 
   try {
+    console.log('JWT_SECRET:', JWT_SECRET);
     const decoded = jwt.verify(token, JWT_SECRET) as any;
+    console.log('Token decoded successfully:', decoded);
     
     // Verify user still exists in database
     const client = await pool.connect();
@@ -38,13 +49,20 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     );
     client.release();
 
+    console.log('Database query result:', result.rows);
+
     if (result.rows.length === 0) {
+      console.log('User not found in database');
       return res.status(401).json({ message: 'User not found' });
     }
 
     req.user = result.rows[0];
+    console.log('User set in request:', req.user);
+    console.log('=== AUTHENTICATION SUCCESS ===');
     next();
   } catch (error) {
+    console.log('Token verification failed:', error);
+    console.log('=== AUTHENTICATION FAILED ===');
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };

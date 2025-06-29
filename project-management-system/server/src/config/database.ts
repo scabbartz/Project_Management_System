@@ -66,6 +66,8 @@ export const initializeDatabase = async (): Promise<void> => {
         name VARCHAR(255) NOT NULL,
         description TEXT,
         scope TEXT,
+        objectives TEXT[],
+        deliverables TEXT[],
         status VARCHAR(50) DEFAULT 'Planning',
         priority VARCHAR(50) DEFAULT 'Medium',
         tags TEXT[],
@@ -257,6 +259,18 @@ export const initializeDatabase = async (): Promise<void> => {
       ON CONFLICT (name) DO NOTHING
     `);
 
+    // Add missing columns to existing projects table if they don't exist
+    try {
+      await client.query(`
+        ALTER TABLE projects 
+        ADD COLUMN IF NOT EXISTS objectives TEXT[],
+        ADD COLUMN IF NOT EXISTS deliverables TEXT[]
+      `);
+      console.log('Added objectives and deliverables columns to projects table');
+    } catch (error) {
+      console.log('Columns may already exist or error occurred:', error);
+    }
+
     // Insert default admin user if not exists
     const adminCheck = await client.query('SELECT id FROM users WHERE email = $1', ['admin@khelotech.com']);
     if (adminCheck.rows.length === 0) {
@@ -268,6 +282,7 @@ export const initializeDatabase = async (): Promise<void> => {
       );
     }
 
+    client.release();
     console.log('Database tables initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);

@@ -82,7 +82,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
 
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
             <TextField
-              fullWidth
+              id="login-email"
+              name="email"
               label="Email"
               type="email"
               value={formData.email}
@@ -95,7 +96,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
             />
 
             <TextField
-              fullWidth
+              id="login-password"
+              name="password"
               label="Password"
               type="password"
               value={formData.password}

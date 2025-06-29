@@ -101,8 +101,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
 
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
             <TextField
-              fullWidth
-              label="Full Name"
+              id="register-name"
+              name="name"
+              label="Name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               error={!!formErrors.name}
@@ -113,7 +114,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
             />
 
             <TextField
-              fullWidth
+              id="register-email"
+              name="email"
               label="Email"
               type="email"
               value={formData.email}
@@ -139,7 +141,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
             </FormControl>
 
             <TextField
-              fullWidth
+              id="register-password"
+              name="password"
               label="Password"
               type="password"
               value={formData.password}
@@ -152,7 +155,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
             />
 
             <TextField
-              fullWidth
+              id="register-confirm-password"
+              name="confirmPassword"
               label="Confirm Password"
               type="password"
               value={formData.confirmPassword}

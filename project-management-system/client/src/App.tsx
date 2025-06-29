@@ -70,6 +70,10 @@ const AppContent: React.FC = () => {
   const { user } = useAuth();
   const isAuthenticated = !!user;
 
+  console.log("=== APP CONTENT RENDERED ===");
+  console.log("User:", user);
+  console.log("Is authenticated:", isAuthenticated);
+
   return (
     <>
       <Navigation />
