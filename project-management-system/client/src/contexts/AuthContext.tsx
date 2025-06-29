@@ -1,0 +1,155 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from '../types';
+
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, role?: string) => Promise<void>;
+  logout: () => void;
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user is authenticated on app start
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (token) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/users/profile`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user);
+          } else {
+            // Token is invalid, clear it
+            localStorage.removeItem('token');
+            setToken(null);
+          }
+        } catch (err) {
+          console.error('Auth check failed:', err);
+          localStorage.removeItem('token');
+          setToken(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, [token]);
+
+  const login = async (email: string, password: string) => {
+    try {
+      setError(null);
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem('token', data.token);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (name: string, email: string, password: string, role: string = 'Team Member') => {
+    try {
+      setError(null);
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem('token', data.token);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+  };
+
+  const clearError = () => {
+    setError(null);
+  };
+
+  const value: AuthContextType = {
+    user,
+    token,
+    login,
+    register,
+    logout,
+    loading,
+    error,
+    clearError,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}; 

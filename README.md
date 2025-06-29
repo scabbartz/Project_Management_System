@@ -1,46 +1,174 @@
-# Getting Started with Create React App
+# Khelo Tech Project Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive project management system designed specifically for Khelo Tech's sports department. This full-stack application provides an intuitive interface for managing sports-related projects with modern web technologies.
 
-## Available Scripts
+## 🏗️ Architecture
 
-In the project directory, you can run:
+- **Frontend**: React 19 + TypeScript + Material-UI
+- **Backend**: Node.js + Express + TypeScript
+- **Containerization**: Docker + Docker Compose
+- **Testing**: Jest for both frontend and backend
+- **API Documentation**: OpenAPI/Swagger specification
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### ✅ Currently Implemented
+- **Project Listing**: View all projects in a clean, organized list
+- **Project Details**: Comprehensive project information display including:
+  - Project name, description, and scope
+  - Start and end dates
+  - Objectives and deliverables
+  - Project ID and metadata
+- **Modern UI**: Material-UI based responsive interface
+- **RESTful API**: Complete CRUD operations (GET, POST, PUT, DELETE)
+- **Error Handling**: Comprehensive error states and user feedback
+- **Loading States**: Smooth loading indicators
+- **Navigation**: Intuitive routing between pages
+- **Testing**: Comprehensive test coverage for both frontend and backend
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 🚧 Planned Features
+- **Project Creation**: Add new projects through a user-friendly form
+- **Project Editing**: Modify existing project details
+- **Project Deletion**: Remove projects with confirmation
+- **User Authentication**: Secure login and user management
+- **Database Integration**: PostgreSQL for persistent data storage
+- **Project Status Management**: Track project progress (Planning, Active, On Hold, Completed, Cancelled)
+- **User Management**: Role-based access control
+- **Search & Filtering**: Find projects quickly
+- **File Attachments**: Upload and manage project documents
+- **Project Comments**: Team collaboration features
+- **Email Notifications**: Automated project updates
+- **Reporting**: Project analytics and insights
 
-### `npm test`
+## 🚀 Quick Start
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Docker (optional, for containerized deployment)
 
-### `npm run build`
+### Development Setup
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Project_Management_System
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Start the Backend Server**
+   ```bash
+   cd project-management-system/server
+   npm install
+   npm run dev
+   ```
+   Server will run on http://localhost:3001
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. **Start the Frontend Client**
+   ```bash
+   cd project-management-system/client
+   npm install
+   npm start
+   ```
+   Client will run on http://localhost:3000
 
-### `npm run eject`
+4. **Set Environment Variables**
+   Create `.env` file in the client directory:
+   ```
+   REACT_APP_API_BASE_URL=http://localhost:3001/api
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Docker Deployment
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+cd project-management-system
+docker-compose up --build
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 📁 Project Structure
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```
+project-management-system/
+├── client/                 # React frontend
+│   ├── public/            # Static assets
+│   │   ├── components/    # Reusable UI components
+│   │   ├── pages/         # Page components
+│   │   ├── types/         # TypeScript type definitions
+│   │   └── App.tsx        # Main application component
+│   └── package.json
+├── server/                # Node.js backend
+│   ├── src/
+│   │   ├── routes/        # API route handlers
+│   │   └── index.ts       # Server entry point
+│   ├── Dockerfile         # Container configuration
+│   └── package.json
+├── docker-compose.yml     # Multi-container setup
+└── README.md
+```
 
-## Learn More
+## 🧪 Testing
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Backend Tests
+```bash
+cd project-management-system/server
+npm test
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Frontend Tests
+```bash
+cd project-management-system/client
+npm test
+```
+
+## 📚 API Documentation
+
+The API is documented using OpenAPI/Swagger specification. Available endpoints:
+
+- `GET /api/projects` - List all projects
+- `POST /api/projects` - Create a new project
+- `GET /api/projects/:id` - Get project details
+- `PUT /api/projects/:id` - Update project
+- `DELETE /api/projects/:id` - Delete project
+
+## 🔧 Development
+
+### Available Scripts
+
+**Backend:**
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build TypeScript to JavaScript
+- `npm start` - Start production server
+- `npm test` - Run tests with coverage
+
+**Frontend:**
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run eject` - Eject from Create React App
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the ISC License.
+
+## 👥 Team
+
+- **Author**: Jules V2
+- **Organization**: Khelo Tech
+- **Contact**: support@khelotech.com
+
+## 🆘 Support
+
+For support and questions, please contact:
+- Email: support@khelotech.com
+- Project Issues: [GitHub Issues](link-to-issues)
+
+---
+
+**Built with ❤️ for Khelo Tech's Sports Department**

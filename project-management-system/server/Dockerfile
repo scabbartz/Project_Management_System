@@ -10,6 +10,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application source code
 COPY . .
 
+# Clean any existing build artifacts
+RUN rm -rf dist
+
 # Build TypeScript code
 RUN npm run build
 
@@ -23,9 +26,9 @@ ENV NODE_ENV=production
 # ENV PORT=3001 # Already defaulted in index.ts, but can be set here
 
 # Copy built application and production dependencies from builder stage
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY package.json . # For metadata, and in case any runtime script needs it
+COPY --from=builder /usr/src/app/dist ./dist/
+COPY --from=builder /usr/src/app/node_modules ./node_modules/
+COPY --from=builder /usr/src/app/package.json ./
 
 # Expose port
 EXPOSE 3001

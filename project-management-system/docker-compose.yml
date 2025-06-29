@@ -1,61 +1,96 @@
-version: '3.8'
-
 services:
+  # PostgreSQL Database
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: pms_postgres_db
+    environment:
+      POSTGRES_DB: pms_dev_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - pms_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d pms_dev_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: pms_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pms_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Backend API Server
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
-    image: project-management-system-server:latest # Define an image name
+    image: project-management-system-server:latest
     container_name: pms_server
-    ports:
-      - "3001:3001" # Map host port 3001 to container port 3001
-    volumes:
-      # For development, you might want to mount the src directory:
-      # - ./server/src:/usr/src/app/src
-      # However, for production build as per Dockerfile, this is not needed.
-      # The Dockerfile handles copying and building the code.
-      # If you want live reload for dev, the Dockerfile and CMD would need to change (e.g. use nodemon).
-      # For now, this setup is more aligned with a production-like build.
-      - ./server/logs:/usr/src/app/logs # Example if server writes logs to a file, ensure logs dir is created
     environment:
-      - NODE_ENV=development # Or 'production' depending on the use case for docker-compose
-      - PORT=3001
-      # - DATABASE_URL=postgresql://user:password@db_host:5432/pms_db # To be added later
-    restart: unless-stopped
+      NODE_ENV: development
+      PORT: 3001
+      DB_HOST: postgres_db
+      DB_PORT: 5432
+      DB_NAME: pms_dev_db
+      DB_USER: admin
+      DB_PASSWORD: secret
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - pms_network
+    volumes:
+      - ./server/logs:/usr/src/app/logs
+    restart: unless-stopped
 
-  # client: # Client service can be added later, potentially served via Nginx or directly
-  #   build:
-  #     context: ./client
-  #     dockerfile: Dockerfile # A Dockerfile for client would be needed
-  #   ports:
-  #     - "3000:3000"
-  #   container_name: pms_client
-  #   depends_on:
-  #     - server
-  #   networks:
-  #     - pms_network
-
-  # postgres_db: # PostgreSQL service will be added in a later sprint
-  #   image: postgres:15
-  #   container_name: pms_postgres_db
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=secret
-  #     - POSTGRES_DB=pms_dev_db
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   restart: unless-stopped
-  #   networks:
-  #     - pms_network
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: pms_client
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:3001/api
+      REACT_APP_ENVIRONMENT: development
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - pms_network
+    restart: unless-stopped
 
 networks:
   pms_network:
     driver: bridge
 
-# volumes: # Define persistent volume for PostgreSQL data
-#   postgres_data:
-#     driver: local
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

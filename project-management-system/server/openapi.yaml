@@ -13,6 +13,18 @@ servers:
 
 components:
   schemas:
+    ProjectStatus:
+      type: string
+      enum: [Planning, Active, On Hold, Completed, Cancelled]
+      description: Current status of the project.
+      example: "Active"
+
+    ProjectPriority:
+      type: string
+      enum: [Low, Medium, High, Critical]
+      description: Priority level of the project.
+      example: "Medium"
+
     Project:
       type: object
       required:
@@ -57,20 +69,40 @@ components:
             type: string
           description: List of tangible project deliverables.
           example: ["Installed LED lighting system", "Final lighting audit report"]
-        # status:  # To be added later
-        #   type: string
-        #   enum: [Planning, Active, OnHold, Completed, Cancelled]
-        #   description: Current status of the project.
-        # created_at:
-        #   type: string
-        #   format: date-time
-        #   description: Timestamp of when the project was created.
-        #   readOnly: true
-        # updated_at:
-        #   type: string
-        #   format: date-time
-        #   description: Timestamp of when the project was last updated.
-        #   readOnly: true
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
+        priority:
+          $ref: '#/components/schemas/ProjectPriority'
+        budget:
+          type: number
+          description: Project budget in currency units.
+          example: 50000
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags for categorizing projects.
+          example: ["infrastructure", "lighting", "energy-efficiency"]
+        createdBy:
+          type: string
+          description: ID of the user who created the project.
+          example: "user123"
+        assignedTo:
+          type: array
+          items:
+            type: string
+          description: Array of user IDs assigned to the project.
+          example: ["user123", "user456"]
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp of when the project was created.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp of when the project was last updated.
+          readOnly: true
 
     ProjectInput: # Schema for creating/updating projects, omitting readOnly fields like id
       type: object
@@ -104,6 +136,52 @@ components:
           items:
             type: string
           example: ["Installed LED lighting system", "Final lighting audit report"]
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
+        priority:
+          $ref: '#/components/schemas/ProjectPriority'
+        budget:
+          type: number
+          example: 50000
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["infrastructure", "lighting", "energy-efficiency"]
+        assignedTo:
+          type: array
+          items:
+            type: string
+          example: ["user123", "user456"]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user.
+        name:
+          type: string
+          description: Full name of the user.
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+        role:
+          type: string
+          enum: [Admin, Manager, Team Member, Viewer]
+          description: Role of the user in the system.
+        avatar:
+          type: string
+          description: URL to user's avatar image.
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp of when the user was created.
+        lastLogin:
+          type: string
+          format: date-time
+          description: Timestamp of user's last login.
 
     Error:
       type: object
@@ -149,6 +227,21 @@ paths:
       tags:
         - Projects
       operationId: listProjects
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProjectStatus'
+          description: Filter projects by status
+        - name: priority
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProjectPriority'
+          description: Filter projects by priority
+        - name: tag
+          in: query
+          type: string
+          description: Filter projects by tag
       responses:
         '200':
           description: A list of projects.
@@ -244,5 +337,47 @@ paths:
           description: Project deleted successfully. No content.
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Future endpoints for user management
+  /users:
+    get:
+      summary: List all users
+      tags:
+        - Users
+      operationId: listUsers
+      responses:
+        '200':
+          description: A list of users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      operationId: createUser
+      requestBody:
+        description: User object to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
